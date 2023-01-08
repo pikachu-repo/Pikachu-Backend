@@ -3,9 +3,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PoolController } from './pool.controller';
 import { PoolService } from './pool.service';
 import { Pool, PoolSchema } from './schema/pool.schema';
+import { TasksService } from './tasks.service';
 console.log(process.env.PIKACHU_NETWORK);
 @Module({
-  providers: [PoolService],
+  providers: [TasksService, PoolService],
   controllers: [PoolController],
   imports: [
     MongooseModule.forFeature(
