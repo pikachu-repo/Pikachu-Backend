@@ -16,10 +16,34 @@ export class Loan {
   borrower: string;
 
   @Prop({ required: true })
-  collection: string;
+  amount: number;
+
+  @Prop({ required: true })
+  duration: number;
+
+  @Prop({ required: true })
+  collectionContract: string;
 
   @Prop({ required: true })
   tokenId: number;
+
+  @Prop({ required: true, default: 0 })
+  status: number;
+
+  @Prop({ required: true })
+  blockNumber: number;
+
+  @Prop({ required: true })
+  timestamp: number;
+
+  @Prop({ required: true, default: 0 })
+  interestType: number;
+
+  @Prop({ required: true, default: 0 })
+  interestStartRate: number;
+
+  @Prop({ required: true, default: 0 })
+  interestCapRate: number;
 }
 
 export const LoanSchema = SchemaFactory.createForClass(Loan);

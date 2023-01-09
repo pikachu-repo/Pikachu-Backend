@@ -18,4 +18,9 @@ export class PoolController {
   async index() {
     return await this.service.findAll();
   }
+
+  @Get(':poolId/loans')
+  async getLoansByPoolId(@Param('poolId') poolId: number) {
+    return await this.service.findLoansByPoolId(poolId);
+  }
 }
