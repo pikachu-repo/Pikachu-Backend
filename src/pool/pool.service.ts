@@ -4,17 +4,23 @@ import { Model } from 'mongoose';
 import { PikachuContract } from 'src/helpers/contract.constants';
 import { CONVALENTQ_KEY, ethersProvider } from 'src/helpers/provider.constants';
 import fetch from 'node-fetch';
-import { BigNumberish, ethers } from 'ethers';
-import { toFloat, toInteger } from 'src/helpers/string.helpers';
+import { BigNumber, BigNumberish, ethers } from 'ethers';
+import { toFloat, toInteger, toString } from 'src/helpers/string.helpers';
 import { Setting, SettingDocument } from './schema/setting.schema';
 import { Pool, PoolDocument } from './schema/pool.schema';
 import { Loan, LoanDocument } from './schema/loan.schema';
+import { TAdminSettingStruct } from 'src/interfaces/contract.intefaces';
+import alchemy from 'src/helpers/apis/alchemy.api';
+import { Collection, CollectionDocument } from './schema/collection.schema';
 
 @Injectable()
 export class PoolService {
   constructor(
     @InjectModel(Setting.name)
     private readonly settingModel: Model<SettingDocument>,
+
+    @InjectModel(Collection.name)
+    private readonly collectionModel: Model<CollectionDocument>,
 
     @InjectModel(Pool.name)
     private readonly poolModel: Model<PoolDocument>,
@@ -140,5 +146,54 @@ export class PoolService {
       { upsert: true, new: true },
     );
     return loneObj;
+  }
+
+  async findAllCollections(verifiedCollections: string[]) {
+    return await this.collectionModel
+      .find({ contract: { $in: verifiedCollections } })
+      .lean()
+      .exec();
+  }
+
+  async fetchCollections() {
+    let adminSetting: TAdminSettingStruct = {
+      feeTo: '',
+      minDepositAmount: 0,
+      platformFee: 0,
+      blockNumberSlippage: 300,
+      verifiedCollections: [],
+    };
+
+    const [_adminSetting, verifiedCollections] = await Promise.all([
+      PikachuContract.adminSetting(),
+      PikachuContract.verifiedCollections(),
+    ]);
+
+    adminSetting = { ..._adminSetting, verifiedCollections };
+
+    for (let collection of verifiedCollections) {
+      const metadata = await alchemy.nft.getContractMetadata(collection);
+      try {
+        const obj = await this.collectionModel.findOneAndUpdate(
+          { contract: collection.toLowerCase() },
+          {
+            contract: collection.toLowerCase(),
+            name: toString(metadata.name),
+            symbol: toString(metadata.symbol),
+            description: toString(metadata.openSea?.description),
+            totalSupply: toInteger(metadata.totalSupply),
+            contractDeployer: toString(metadata.contractDeployer),
+            deployedBlockNumber: toInteger(metadata.deployedBlockNumber),
+            imageUrl: toString(metadata.openSea?.imageUrl),
+            externalUrl: toString(metadata.openSea?.externalUrl),
+            floorPrice: toFloat(metadata.openSea?.floorPrice),
+          },
+          { upsert: true, new: true },
+        );
+        // console.log(obj);
+      } catch (error) {
+        console.log(error);
+      }
+    }
   }
 }

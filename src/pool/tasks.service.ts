@@ -8,7 +8,12 @@ export class TasksService {
   constructor(private readonly poolService: PoolService) {}
 
   @Cron('40 * * * * *')
-  handleCron() {
+  taskFetchPools() {
     this.poolService.fetchPools();
+  }
+
+  @Cron('45 * * * * *')
+  taskFetchCollections() {
+    this.poolService.fetchCollections();
   }
 }
