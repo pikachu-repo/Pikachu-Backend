@@ -172,28 +172,32 @@ export class PoolService {
     adminSetting = { ..._adminSetting, verifiedCollections };
 
     for (let collection of verifiedCollections) {
-      const metadata = await alchemy.nft.getContractMetadata(collection);
-      try {
-        const obj = await this.collectionModel.findOneAndUpdate(
-          { contract: collection.toLowerCase() },
-          {
-            contract: collection.toLowerCase(),
-            name: toString(metadata.name),
-            symbol: toString(metadata.symbol),
-            description: toString(metadata.openSea?.description),
-            totalSupply: toInteger(metadata.totalSupply),
-            contractDeployer: toString(metadata.contractDeployer),
-            deployedBlockNumber: toInteger(metadata.deployedBlockNumber),
-            imageUrl: toString(metadata.openSea?.imageUrl),
-            externalUrl: toString(metadata.openSea?.externalUrl),
-            floorPrice: toFloat(metadata.openSea?.floorPrice),
-          },
-          { upsert: true, new: true },
-        );
-        // console.log(obj);
-      } catch (error) {
-        console.log(error);
-      }
+      await this.fetchCollection(collection);
+    }
+  }
+
+  async fetchCollection(collection: string) {
+    const metadata = await alchemy.nft.getContractMetadata(collection);
+    try {
+      const obj = await this.collectionModel.findOneAndUpdate(
+        { contract: collection.toLowerCase() },
+        {
+          contract: collection.toLowerCase(),
+          name: toString(metadata.name),
+          symbol: toString(metadata.symbol),
+          description: toString(metadata.openSea?.description),
+          totalSupply: toInteger(metadata.totalSupply),
+          contractDeployer: toString(metadata.contractDeployer),
+          deployedBlockNumber: toInteger(metadata.deployedBlockNumber),
+          imageUrl: toString(metadata.openSea?.imageUrl),
+          externalUrl: toString(metadata.openSea?.externalUrl),
+          floorPrice: toFloat(metadata.openSea?.floorPrice),
+        },
+        { upsert: true, new: true },
+      );
+      return obj;
+    } catch (error) {
+      console.log(error);
     }
   }
 }

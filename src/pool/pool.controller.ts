@@ -19,6 +19,11 @@ export class PoolController {
     return await this.service.findAll();
   }
 
+  @Get('collection/:address')
+  async getCollection(@Param('address') address: string) {
+    return await this.service.fetchCollection(address);
+  }
+
   @Post('collections')
   async getCollections(
     @Body('verifiedCollections') verifiedCollections: string[],
