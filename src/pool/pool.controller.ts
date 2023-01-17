@@ -19,6 +19,11 @@ export class PoolController {
     return await this.service.findAll();
   }
 
+  @Get('update')
+  async updatePools() {
+    return await this.service.fetchPools();
+  }
+
   @Get('collection/:address')
   async getCollection(@Param('address') address: string) {
     return await this.service.fetchCollection(address);
@@ -29,6 +34,11 @@ export class PoolController {
     @Body('verifiedCollections') verifiedCollections: string[],
   ) {
     return await this.service.findAllCollections(verifiedCollections);
+  }
+
+  @Get('signature/:collection')
+  async getSignature(@Param('collection') collection: string) {
+    return await this.service.getSignature(collection);
   }
 
   @Get(':poolId/loans')

@@ -2,12 +2,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from 'ethers';
-import type { Provider } from '@ethersproject/providers';
+import { Contract, Signer, utils } from "ethers";
+import type { Provider } from "@ethersproject/providers";
 import type {
   IPikachu,
   IPikachuInterface,
-} from '../../../contracts/interfaces/IPikachu';
+} from "../../../contracts/interfaces/IPikachu";
 
 const _abi = [
   {
@@ -15,155 +15,174 @@ const _abi = [
     inputs: [
       {
         indexed: true,
-        internalType: 'uint256',
-        name: 'poolId',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "poolId",
+        type: "uint256",
       },
       {
         indexed: true,
-        internalType: 'address',
-        name: 'borrower',
-        type: 'address',
+        internalType: "address",
+        name: "borrower",
+        type: "address",
       },
       {
         indexed: false,
-        internalType: 'uint256',
-        name: 'amount',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
       },
     ],
-    name: 'CreatedLoan',
-    type: 'event',
+    name: "CreatedLoan",
+    type: "event",
   },
   {
     anonymous: false,
     inputs: [
       {
         indexed: true,
-        internalType: 'address',
-        name: 'poolOwner',
-        type: 'address',
+        internalType: "address",
+        name: "poolOwner",
+        type: "address",
       },
       {
         indexed: true,
-        internalType: 'uint256',
-        name: 'poolId',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "poolId",
+        type: "uint256",
       },
       {
         indexed: false,
-        internalType: 'uint256',
-        name: 'amount',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
       },
     ],
-    name: 'CreatedPool',
-    type: 'event',
+    name: "CreatedPool",
+    type: "event",
   },
   {
     anonymous: false,
     inputs: [
       {
         indexed: true,
-        internalType: 'uint256',
-        name: 'poolId',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "poolId",
+        type: "uint256",
       },
       {
         indexed: true,
-        internalType: 'address',
-        name: 'borrower',
-        type: 'address',
+        internalType: "address",
+        name: "borrower",
+        type: "address",
       },
       {
         indexed: false,
-        internalType: 'uint256',
-        name: 'amount',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
       },
     ],
-    name: 'LiquidatedLoan',
-    type: 'event',
+    name: "LiquidatedLoan",
+    type: "event",
   },
   {
     anonymous: false,
     inputs: [
       {
         indexed: true,
-        internalType: 'address',
-        name: 'poolOwner',
-        type: 'address',
+        internalType: "uint256",
+        name: "poolId",
+        type: "uint256",
       },
       {
         indexed: true,
-        internalType: 'uint256',
-        name: 'poolId',
-        type: 'uint256',
+        internalType: "address",
+        name: "borrower",
+        type: "address",
       },
     ],
-    name: 'UpdatedPool',
-    type: 'event',
+    name: "RepayedLoan",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "poolOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "poolId",
+        type: "uint256",
+      },
+    ],
+    name: "UpdatedPool",
+    type: "event",
   },
   {
     inputs: [
       {
-        internalType: 'uint256',
-        name: '_poolId',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "_poolId",
+        type: "uint256",
       },
       {
-        internalType: 'address',
-        name: '_collection',
-        type: 'address',
+        internalType: "address",
+        name: "_collection",
+        type: "address",
       },
       {
-        internalType: 'uint256',
-        name: '_tokenId',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "_tokenId",
+        type: "uint256",
       },
       {
-        internalType: 'uint256',
-        name: '_duration',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "_duration",
+        type: "uint256",
       },
       {
-        internalType: 'uint256',
-        name: '_amount',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
       },
       {
-        internalType: 'bytes',
-        name: '_signature',
-        type: 'bytes',
+        internalType: "bytes",
+        name: "_signature",
+        type: "bytes",
       },
       {
-        internalType: 'uint256',
-        name: '_floorPrice',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "_floorPrice",
+        type: "uint256",
       },
       {
-        internalType: 'uint256',
-        name: '_blockNumber',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "_blockNumber",
+        type: "uint256",
       },
     ],
-    name: 'borrow',
+    name: "borrow",
     outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
     inputs: [
       {
-        internalType: 'uint256',
-        name: '_poolId',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "_poolId",
+        type: "uint256",
       },
     ],
-    name: 'repay',
+    name: "repay",
     outputs: [],
-    stateMutability: 'payable',
-    type: 'function',
+    stateMutability: "payable",
+    type: "function",
   },
 ];
 
@@ -174,7 +193,7 @@ export class IPikachu__factory {
   }
   static connect(
     address: string,
-    signerOrProvider: Signer | Provider,
+    signerOrProvider: Signer | Provider
   ): IPikachu {
     return new Contract(address, _abi, signerOrProvider) as IPikachu;
   }

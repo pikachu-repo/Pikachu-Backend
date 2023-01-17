@@ -11,48 +11,48 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from 'ethers';
+} from "ethers";
 import type {
   FunctionFragment,
   Result,
   EventFragment,
-} from '@ethersproject/abi';
-import type { Listener, Provider } from '@ethersproject/providers';
+} from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from '../common';
+} from "../common";
 
 export interface LockInterface extends utils.Interface {
   functions: {
-    'owner()': FunctionFragment;
-    'unlockTime()': FunctionFragment;
-    'withdraw()': FunctionFragment;
+    "owner()": FunctionFragment;
+    "unlockTime()": FunctionFragment;
+    "withdraw()": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: 'owner' | 'unlockTime' | 'withdraw',
+    nameOrSignatureOrTopic: "owner" | "unlockTime" | "withdraw"
   ): FunctionFragment;
 
-  encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: 'unlockTime',
-    values?: undefined,
+    functionFragment: "unlockTime",
+    values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: 'withdraw', values?: undefined): string;
+  encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
 
-  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'unlockTime', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'withdraw', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "unlockTime", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
-    'Withdrawal(uint256,uint256)': EventFragment;
+    "Withdrawal(uint256,uint256)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: 'Withdrawal'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Withdrawal"): EventFragment;
 }
 
 export interface WithdrawalEventObject {
@@ -76,15 +76,15 @@ export interface Lock extends BaseContract {
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined,
+    toBlock?: string | number | undefined
   ): Promise<Array<TEvent>>;
 
   listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>,
+    eventFilter?: TypedEventFilter<TEvent>
   ): Array<TypedListener<TEvent>>;
   listeners(eventName?: string): Array<Listener>;
   removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>,
+    eventFilter: TypedEventFilter<TEvent>
   ): this;
   removeAllListeners(eventName?: string): this;
   off: OnEvent<this>;
@@ -98,7 +98,7 @@ export interface Lock extends BaseContract {
     unlockTime(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     withdraw(
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
 
@@ -107,7 +107,7 @@ export interface Lock extends BaseContract {
   unlockTime(overrides?: CallOverrides): Promise<BigNumber>;
 
   withdraw(
-    overrides?: Overrides & { from?: PromiseOrValue<string> },
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
@@ -119,9 +119,9 @@ export interface Lock extends BaseContract {
   };
 
   filters: {
-    'Withdrawal(uint256,uint256)'(
+    "Withdrawal(uint256,uint256)"(
       amount?: null,
-      when?: null,
+      when?: null
     ): WithdrawalEventFilter;
     Withdrawal(amount?: null, when?: null): WithdrawalEventFilter;
   };
@@ -132,7 +132,7 @@ export interface Lock extends BaseContract {
     unlockTime(overrides?: CallOverrides): Promise<BigNumber>;
 
     withdraw(
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
 
@@ -142,7 +142,7 @@ export interface Lock extends BaseContract {
     unlockTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     withdraw(
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };
 }

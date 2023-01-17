@@ -13,4 +13,8 @@ export const ethersProvider = new ethers.providers.JsonRpcProvider(
   PIKACHU_NETWORK.rpc,
 );
 
+export const ADMIN_PVKEY = process.env.ADMIN_PVKEY;
+
+export const ethersSigner = new ethers.Wallet(ADMIN_PVKEY, ethersProvider);
+
 export const CONVALENTQ_KEY = process.env.API_COVALENT;

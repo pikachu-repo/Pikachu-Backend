@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { SchemaTypes, Document, Types } from 'mongoose';
-import { Pool } from './pool.schema';
+import { Document } from 'mongoose';
 
 export type LoanDocument = Loan & Document;
 

@@ -13,20 +13,20 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from 'ethers';
+} from "ethers";
 import type {
   FunctionFragment,
   Result,
   EventFragment,
-} from '@ethersproject/abi';
-import type { Listener, Provider } from '@ethersproject/providers';
+} from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from '../../common';
+} from "../../common";
 
 export declare namespace NFTAave {
   export type PoolStruct = {
@@ -74,7 +74,7 @@ export declare namespace NFTAave {
     BigNumber,
     BigNumber,
     boolean,
-    string[],
+    string[]
   ] & {
     owner: string;
     status: number;
@@ -114,32 +114,32 @@ export declare namespace NFTAave {
 
 export interface NFTAaveInterface extends utils.Interface {
   functions: {
-    'createPool(uint256,uint256,uint8,uint256,uint256,bool,address[])': FunctionFragment;
-    'getPoolById(uint256)': FunctionFragment;
-    'getPoolByOwner(address)': FunctionFragment;
-    'owner()': FunctionFragment;
-    'poolOwners(uint256)': FunctionFragment;
-    'renounceOwnership()': FunctionFragment;
-    'totalPools()': FunctionFragment;
-    'transferOwnership(address)': FunctionFragment;
-    'updateAdminSetting((address[],address,uint256))': FunctionFragment;
+    "createPool(uint256,uint256,uint8,uint256,uint256,bool,address[])": FunctionFragment;
+    "getPoolById(uint256)": FunctionFragment;
+    "getPoolByOwner(address)": FunctionFragment;
+    "owner()": FunctionFragment;
+    "poolOwners(uint256)": FunctionFragment;
+    "renounceOwnership()": FunctionFragment;
+    "totalPools()": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
+    "updateAdminSetting((address[],address,uint256))": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | 'createPool'
-      | 'getPoolById'
-      | 'getPoolByOwner'
-      | 'owner'
-      | 'poolOwners'
-      | 'renounceOwnership'
-      | 'totalPools'
-      | 'transferOwnership'
-      | 'updateAdminSetting',
+      | "createPool"
+      | "getPoolById"
+      | "getPoolByOwner"
+      | "owner"
+      | "poolOwners"
+      | "renounceOwnership"
+      | "totalPools"
+      | "transferOwnership"
+      | "updateAdminSetting"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: 'createPool',
+    functionFragment: "createPool",
     values: [
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
@@ -147,69 +147,69 @@ export interface NFTAaveInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<boolean>,
-      PromiseOrValue<string>[],
-    ],
+      PromiseOrValue<string>[]
+    ]
   ): string;
   encodeFunctionData(
-    functionFragment: 'getPoolById',
-    values: [PromiseOrValue<BigNumberish>],
+    functionFragment: "getPoolById",
+    values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: 'getPoolByOwner',
-    values: [PromiseOrValue<string>],
+    functionFragment: "getPoolByOwner",
+    values: [PromiseOrValue<string>]
   ): string;
-  encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: 'poolOwners',
-    values: [PromiseOrValue<BigNumberish>],
-  ): string;
-  encodeFunctionData(
-    functionFragment: 'renounceOwnership',
-    values?: undefined,
+    functionFragment: "poolOwners",
+    values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: 'totalPools',
-    values?: undefined,
+    functionFragment: "renounceOwnership",
+    values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: 'transferOwnership',
-    values: [PromiseOrValue<string>],
+    functionFragment: "totalPools",
+    values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: 'updateAdminSetting',
-    values: [NFTAave.AdminSettingStruct],
+    functionFragment: "transferOwnership",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "updateAdminSetting",
+    values: [NFTAave.AdminSettingStruct]
   ): string;
 
-  decodeFunctionResult(functionFragment: 'createPool', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "createPool", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: 'getPoolById',
-    data: BytesLike,
+    functionFragment: "getPoolById",
+    data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'getPoolByOwner',
-    data: BytesLike,
+    functionFragment: "getPoolByOwner",
+    data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'poolOwners', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "poolOwners", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: 'renounceOwnership',
-    data: BytesLike,
+    functionFragment: "renounceOwnership",
+    data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: 'totalPools', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "totalPools", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: 'transferOwnership',
-    data: BytesLike,
+    functionFragment: "transferOwnership",
+    data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'updateAdminSetting',
-    data: BytesLike,
+    functionFragment: "updateAdminSetting",
+    data: BytesLike
   ): Result;
 
   events: {
-    'OwnershipTransferred(address,address)': EventFragment;
+    "OwnershipTransferred(address,address)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 }
 
 export interface OwnershipTransferredEventObject {
@@ -234,15 +234,15 @@ export interface NFTAave extends BaseContract {
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined,
+    toBlock?: string | number | undefined
   ): Promise<Array<TEvent>>;
 
   listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>,
+    eventFilter?: TypedEventFilter<TEvent>
   ): Array<TypedListener<TEvent>>;
   listeners(eventName?: string): Array<Listener>;
   removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>,
+    eventFilter: TypedEventFilter<TEvent>
   ): this;
   removeAllListeners(eventName?: string): this;
   off: OnEvent<this>;
@@ -259,40 +259,40 @@ export interface NFTAave extends BaseContract {
       _maxDuration: PromiseOrValue<BigNumberish>,
       _compound: PromiseOrValue<boolean>,
       _collections: PromiseOrValue<string>[],
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     getPoolById(
       _poolId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<[NFTAave.PoolStructOutput]>;
 
     getPoolByOwner(
       _owner: PromiseOrValue<string>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<[NFTAave.PoolStructOutput]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     poolOwners(
       arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<[string]>;
 
     renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     totalPools(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     updateAdminSetting(
       _adminSetting: NFTAave.AdminSettingStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
 
@@ -304,40 +304,40 @@ export interface NFTAave extends BaseContract {
     _maxDuration: PromiseOrValue<BigNumberish>,
     _compound: PromiseOrValue<boolean>,
     _collections: PromiseOrValue<string>[],
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
+    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   getPoolById(
     _poolId: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<NFTAave.PoolStructOutput>;
 
   getPoolByOwner(
     _owner: PromiseOrValue<string>,
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<NFTAave.PoolStructOutput>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
   poolOwners(
     arg0: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<string>;
 
   renounceOwnership(
-    overrides?: Overrides & { from?: PromiseOrValue<string> },
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   totalPools(overrides?: CallOverrides): Promise<BigNumber>;
 
   transferOwnership(
     newOwner: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> },
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   updateAdminSetting(
     _adminSetting: NFTAave.AdminSettingStruct,
-    overrides?: Overrides & { from?: PromiseOrValue<string> },
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
@@ -349,24 +349,24 @@ export interface NFTAave extends BaseContract {
       _maxDuration: PromiseOrValue<BigNumberish>,
       _compound: PromiseOrValue<boolean>,
       _collections: PromiseOrValue<string>[],
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<void>;
 
     getPoolById(
       _poolId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<NFTAave.PoolStructOutput>;
 
     getPoolByOwner(
       _owner: PromiseOrValue<string>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<NFTAave.PoolStructOutput>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
     poolOwners(
       arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
@@ -375,23 +375,23 @@ export interface NFTAave extends BaseContract {
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<void>;
 
     updateAdminSetting(
       _adminSetting: NFTAave.AdminSettingStruct,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<void>;
   };
 
   filters: {
-    'OwnershipTransferred(address,address)'(
+    "OwnershipTransferred(address,address)"(
       previousOwner?: PromiseOrValue<string> | null,
-      newOwner?: PromiseOrValue<string> | null,
+      newOwner?: PromiseOrValue<string> | null
     ): OwnershipTransferredEventFilter;
     OwnershipTransferred(
       previousOwner?: PromiseOrValue<string> | null,
-      newOwner?: PromiseOrValue<string> | null,
+      newOwner?: PromiseOrValue<string> | null
     ): OwnershipTransferredEventFilter;
   };
 
@@ -404,40 +404,40 @@ export interface NFTAave extends BaseContract {
       _maxDuration: PromiseOrValue<BigNumberish>,
       _compound: PromiseOrValue<boolean>,
       _collections: PromiseOrValue<string>[],
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     getPoolById(
       _poolId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getPoolByOwner(
       _owner: PromiseOrValue<string>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     poolOwners(
       arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     totalPools(overrides?: CallOverrides): Promise<BigNumber>;
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     updateAdminSetting(
       _adminSetting: NFTAave.AdminSettingStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
 
@@ -450,40 +450,40 @@ export interface NFTAave extends BaseContract {
       _maxDuration: PromiseOrValue<BigNumberish>,
       _compound: PromiseOrValue<boolean>,
       _collections: PromiseOrValue<string>[],
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     getPoolById(
       _poolId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getPoolByOwner(
       _owner: PromiseOrValue<string>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     poolOwners(
       arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     totalPools(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     updateAdminSetting(
       _adminSetting: NFTAave.AdminSettingStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };
 }

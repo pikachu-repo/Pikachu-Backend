@@ -13,31 +13,31 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from 'ethers';
+} from "ethers";
 import type {
   FunctionFragment,
   Result,
   EventFragment,
-} from '@ethersproject/abi';
-import type { Listener, Provider } from '@ethersproject/providers';
+} from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from '../../common';
+} from "../../common";
 
 export interface IPikachuInterface extends utils.Interface {
   functions: {
-    'borrow(uint256,address,uint256,uint256,uint256,bytes,uint256,uint256)': FunctionFragment;
-    'repay(uint256)': FunctionFragment;
+    "borrow(uint256,address,uint256,uint256,uint256,bytes,uint256,uint256)": FunctionFragment;
+    "repay(uint256)": FunctionFragment;
   };
 
-  getFunction(nameOrSignatureOrTopic: 'borrow' | 'repay'): FunctionFragment;
+  getFunction(nameOrSignatureOrTopic: "borrow" | "repay"): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: 'borrow',
+    functionFragment: "borrow",
     values: [
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<string>,
@@ -46,28 +46,30 @@ export interface IPikachuInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BytesLike>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-    ],
+      PromiseOrValue<BigNumberish>
+    ]
   ): string;
   encodeFunctionData(
-    functionFragment: 'repay',
-    values: [PromiseOrValue<BigNumberish>],
+    functionFragment: "repay",
+    values: [PromiseOrValue<BigNumberish>]
   ): string;
 
-  decodeFunctionResult(functionFragment: 'borrow', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'repay', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "borrow", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "repay", data: BytesLike): Result;
 
   events: {
-    'CreatedLoan(uint256,address,uint256)': EventFragment;
-    'CreatedPool(address,uint256,uint256)': EventFragment;
-    'LiquidatedLoan(uint256,address,uint256)': EventFragment;
-    'UpdatedPool(address,uint256)': EventFragment;
+    "CreatedLoan(uint256,address,uint256)": EventFragment;
+    "CreatedPool(address,uint256,uint256)": EventFragment;
+    "LiquidatedLoan(uint256,address,uint256)": EventFragment;
+    "RepayedLoan(uint256,address)": EventFragment;
+    "UpdatedPool(address,uint256)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: 'CreatedLoan'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'CreatedPool'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'LiquidatedLoan'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'UpdatedPool'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "CreatedLoan"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "CreatedPool"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "LiquidatedLoan"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RepayedLoan"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "UpdatedPool"): EventFragment;
 }
 
 export interface CreatedLoanEventObject {
@@ -106,6 +108,17 @@ export type LiquidatedLoanEvent = TypedEvent<
 
 export type LiquidatedLoanEventFilter = TypedEventFilter<LiquidatedLoanEvent>;
 
+export interface RepayedLoanEventObject {
+  poolId: BigNumber;
+  borrower: string;
+}
+export type RepayedLoanEvent = TypedEvent<
+  [BigNumber, string],
+  RepayedLoanEventObject
+>;
+
+export type RepayedLoanEventFilter = TypedEventFilter<RepayedLoanEvent>;
+
 export interface UpdatedPoolEventObject {
   poolOwner: string;
   poolId: BigNumber;
@@ -127,15 +140,15 @@ export interface IPikachu extends BaseContract {
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined,
+    toBlock?: string | number | undefined
   ): Promise<Array<TEvent>>;
 
   listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>,
+    eventFilter?: TypedEventFilter<TEvent>
   ): Array<TypedListener<TEvent>>;
   listeners(eventName?: string): Array<Listener>;
   removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>,
+    eventFilter: TypedEventFilter<TEvent>
   ): this;
   removeAllListeners(eventName?: string): this;
   off: OnEvent<this>;
@@ -153,12 +166,12 @@ export interface IPikachu extends BaseContract {
       _signature: PromiseOrValue<BytesLike>,
       _floorPrice: PromiseOrValue<BigNumberish>,
       _blockNumber: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     repay(
       _poolId: PromiseOrValue<BigNumberish>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
 
@@ -171,12 +184,12 @@ export interface IPikachu extends BaseContract {
     _signature: PromiseOrValue<BytesLike>,
     _floorPrice: PromiseOrValue<BigNumberish>,
     _blockNumber: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> },
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   repay(
     _poolId: PromiseOrValue<BigNumberish>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
+    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
@@ -189,56 +202,65 @@ export interface IPikachu extends BaseContract {
       _signature: PromiseOrValue<BytesLike>,
       _floorPrice: PromiseOrValue<BigNumberish>,
       _blockNumber: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<void>;
 
     repay(
       _poolId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<void>;
   };
 
   filters: {
-    'CreatedLoan(uint256,address,uint256)'(
+    "CreatedLoan(uint256,address,uint256)"(
       poolId?: PromiseOrValue<BigNumberish> | null,
       borrower?: PromiseOrValue<string> | null,
-      amount?: null,
+      amount?: null
     ): CreatedLoanEventFilter;
     CreatedLoan(
       poolId?: PromiseOrValue<BigNumberish> | null,
       borrower?: PromiseOrValue<string> | null,
-      amount?: null,
+      amount?: null
     ): CreatedLoanEventFilter;
 
-    'CreatedPool(address,uint256,uint256)'(
+    "CreatedPool(address,uint256,uint256)"(
       poolOwner?: PromiseOrValue<string> | null,
       poolId?: PromiseOrValue<BigNumberish> | null,
-      amount?: null,
+      amount?: null
     ): CreatedPoolEventFilter;
     CreatedPool(
       poolOwner?: PromiseOrValue<string> | null,
       poolId?: PromiseOrValue<BigNumberish> | null,
-      amount?: null,
+      amount?: null
     ): CreatedPoolEventFilter;
 
-    'LiquidatedLoan(uint256,address,uint256)'(
+    "LiquidatedLoan(uint256,address,uint256)"(
       poolId?: PromiseOrValue<BigNumberish> | null,
       borrower?: PromiseOrValue<string> | null,
-      amount?: null,
+      amount?: null
     ): LiquidatedLoanEventFilter;
     LiquidatedLoan(
       poolId?: PromiseOrValue<BigNumberish> | null,
       borrower?: PromiseOrValue<string> | null,
-      amount?: null,
+      amount?: null
     ): LiquidatedLoanEventFilter;
 
-    'UpdatedPool(address,uint256)'(
-      poolOwner?: PromiseOrValue<string> | null,
+    "RepayedLoan(uint256,address)"(
       poolId?: PromiseOrValue<BigNumberish> | null,
+      borrower?: PromiseOrValue<string> | null
+    ): RepayedLoanEventFilter;
+    RepayedLoan(
+      poolId?: PromiseOrValue<BigNumberish> | null,
+      borrower?: PromiseOrValue<string> | null
+    ): RepayedLoanEventFilter;
+
+    "UpdatedPool(address,uint256)"(
+      poolOwner?: PromiseOrValue<string> | null,
+      poolId?: PromiseOrValue<BigNumberish> | null
     ): UpdatedPoolEventFilter;
     UpdatedPool(
       poolOwner?: PromiseOrValue<string> | null,
-      poolId?: PromiseOrValue<BigNumberish> | null,
+      poolId?: PromiseOrValue<BigNumberish> | null
     ): UpdatedPoolEventFilter;
   };
 
@@ -252,12 +274,12 @@ export interface IPikachu extends BaseContract {
       _signature: PromiseOrValue<BytesLike>,
       _floorPrice: PromiseOrValue<BigNumberish>,
       _blockNumber: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     repay(
       _poolId: PromiseOrValue<BigNumberish>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
 
@@ -271,12 +293,12 @@ export interface IPikachu extends BaseContract {
       _signature: PromiseOrValue<BytesLike>,
       _floorPrice: PromiseOrValue<BigNumberish>,
       _blockNumber: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> },
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     repay(
       _poolId: PromiseOrValue<BigNumberish>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };
 }

@@ -2,7 +2,11 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { PikachuContract } from 'src/helpers/contract.constants';
-import { CONVALENTQ_KEY, ethersProvider } from 'src/helpers/provider.constants';
+import {
+  CONVALENTQ_KEY,
+  ethersProvider,
+  ethersSigner,
+} from 'src/helpers/provider.constants';
 import fetch from 'node-fetch';
 import { BigNumber, BigNumberish, ethers } from 'ethers';
 import { toFloat, toInteger, toString } from 'src/helpers/string.helpers';
@@ -65,19 +69,33 @@ export class PoolService {
       return [];
     }
   }
+  async getLastBlockHeight(): Promise<number> {
+    try {
+      let result = await fetch(
+        `https://api.covalenthq.com/v1/80001/block_v2/latest/?quote-currency=USD&format=JSON&key=${CONVALENTQ_KEY}`,
+      );
+
+      result = await result.json();
+      if (result.error === true) return 0;
+      return result.data.items[0].height;
+    } catch (error) {
+      console.log(error);
+      return 0;
+    }
+  }
 
   async fetchPools() {
     const pageSize = 10 ** 6;
     const [setting, lastBlockNumber] = await Promise.all([
       this.settingModel.findOne(),
-      ethersProvider.getBlockNumber(),
+      this.getLastBlockHeight(),
     ]);
     let startingBlock, endingBlock;
     do {
       startingBlock = setting.lastBlockHeight;
       endingBlock = Math.min(startingBlock + pageSize, lastBlockNumber);
 
-      const [createdEvents, loanEvents] = await Promise.all([
+      const [createdEvents, loanEvents, repayEvents] = await Promise.all([
         this.getPikachuEvents(
           PikachuContract.address,
           PikachuContract.filters.CreatedPool().topics[0],
@@ -87,6 +105,12 @@ export class PoolService {
         this.getPikachuEvents(
           PikachuContract.address,
           PikachuContract.filters.CreatedLoan().topics[0],
+          startingBlock,
+          endingBlock,
+        ),
+        this.getPikachuEvents(
+          PikachuContract.address,
+          PikachuContract.filters.RepayedLoan().topics[0],
           startingBlock,
           endingBlock,
         ),
@@ -120,12 +144,20 @@ export class PoolService {
         const borrower = `0x${event.raw_log_topics[2].slice(-40)}`;
         await this.updateLoan(poolId, borrower);
       }
+
+      for (let i = 0; i < repayEvents.length; i++) {
+        const event = repayEvents[i];
+        const poolId = toInteger(event[1]);
+        const borrower = `0x${event.raw_log_topics[2].slice(-40)}`;
+        await this.updateLoan(poolId, borrower, true);
+      }
+
       setting.lastBlockHeight = endingBlock + 1;
       await setting.save();
     } while (endingBlock < lastBlockNumber);
   }
 
-  async updateLoan(poolId: number, borrower: string) {
+  async updateLoan(poolId: number, borrower: string, repayed = false) {
     const loan = await PikachuContract.loans(poolId, borrower);
     const loneObj = await this.loanModel.findOneAndUpdate(
       { poolId, borrower },
@@ -191,7 +223,8 @@ export class PoolService {
           deployedBlockNumber: toInteger(metadata.deployedBlockNumber),
           imageUrl: toString(metadata.openSea?.imageUrl),
           externalUrl: toString(metadata.openSea?.externalUrl),
-          floorPrice: toFloat(metadata.openSea?.floorPrice),
+          floorPrice:
+            toFloat(metadata.openSea?.floorPrice) + Math.random() * 0.25,
         },
         { upsert: true, new: true },
       );
@@ -199,5 +232,43 @@ export class PoolService {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async getSignature(collection: string): Promise<{
+    floorPrice: number;
+    signature: string;
+    blockNumber: number;
+  }> {
+    let collectionObj = await this.collectionModel
+      .findOne({ contract: collection })
+      .exec();
+
+    if (!collectionObj) collectionObj = await this.fetchCollection(collection);
+
+    if (!collectionObj) {
+      throw new HttpException(
+        'POOL_C:COLLECTION_NOT_FOUND',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const floorPrice = collectionObj.floorPrice;
+    const blockNumber = (await ethersProvider.getBlockNumber()) || 0;
+
+    const hash = await PikachuContract.getMessageHash(
+      collection,
+      ethers.utils.parseEther(floorPrice.toString()),
+      blockNumber,
+    );
+
+    const signature = await ethersSigner.signMessage(
+      ethers.utils.arrayify(hash),
+    );
+
+    return {
+      floorPrice,
+      signature,
+      blockNumber,
+    };
   }
 }

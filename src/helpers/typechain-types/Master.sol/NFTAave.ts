@@ -12,16 +12,16 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from 'ethers';
-import type { FunctionFragment, Result } from '@ethersproject/abi';
-import type { Listener, Provider } from '@ethersproject/providers';
+} from "ethers";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from '../common';
+} from "../common";
 
 export declare namespace NFTAave {
   export type PoolStruct = {
@@ -69,7 +69,7 @@ export declare namespace NFTAave {
     BigNumber,
     BigNumber,
     boolean,
-    string[],
+    string[]
   ] & {
     owner: string;
     status: number;
@@ -97,24 +97,24 @@ export declare namespace NFTAave {
 
 export interface NFTAaveInterface extends utils.Interface {
   functions: {
-    'createPool(uint256,uint256,uint8,uint256,uint256,bool,address[])': FunctionFragment;
-    'getPoolById(uint256)': FunctionFragment;
-    'getPoolByOwner(address)': FunctionFragment;
-    'poolOwners(uint256)': FunctionFragment;
-    'totalPools()': FunctionFragment;
+    "createPool(uint256,uint256,uint8,uint256,uint256,bool,address[])": FunctionFragment;
+    "getPoolById(uint256)": FunctionFragment;
+    "getPoolByOwner(address)": FunctionFragment;
+    "poolOwners(uint256)": FunctionFragment;
+    "totalPools()": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | 'createPool'
-      | 'getPoolById'
-      | 'getPoolByOwner'
-      | 'poolOwners'
-      | 'totalPools',
+      | "createPool"
+      | "getPoolById"
+      | "getPoolByOwner"
+      | "poolOwners"
+      | "totalPools"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: 'createPool',
+    functionFragment: "createPool",
     values: [
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
@@ -122,37 +122,37 @@ export interface NFTAaveInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<boolean>,
-      PromiseOrValue<string>[],
-    ],
+      PromiseOrValue<string>[]
+    ]
   ): string;
   encodeFunctionData(
-    functionFragment: 'getPoolById',
-    values: [PromiseOrValue<BigNumberish>],
+    functionFragment: "getPoolById",
+    values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: 'getPoolByOwner',
-    values: [PromiseOrValue<string>],
+    functionFragment: "getPoolByOwner",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: 'poolOwners',
-    values: [PromiseOrValue<BigNumberish>],
+    functionFragment: "poolOwners",
+    values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: 'totalPools',
-    values?: undefined,
+    functionFragment: "totalPools",
+    values?: undefined
   ): string;
 
-  decodeFunctionResult(functionFragment: 'createPool', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "createPool", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: 'getPoolById',
-    data: BytesLike,
+    functionFragment: "getPoolById",
+    data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'getPoolByOwner',
-    data: BytesLike,
+    functionFragment: "getPoolByOwner",
+    data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: 'poolOwners', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'totalPools', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "poolOwners", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "totalPools", data: BytesLike): Result;
 
   events: {};
 }
@@ -167,15 +167,15 @@ export interface NFTAave extends BaseContract {
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined,
+    toBlock?: string | number | undefined
   ): Promise<Array<TEvent>>;
 
   listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>,
+    eventFilter?: TypedEventFilter<TEvent>
   ): Array<TypedListener<TEvent>>;
   listeners(eventName?: string): Array<Listener>;
   removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>,
+    eventFilter: TypedEventFilter<TEvent>
   ): this;
   removeAllListeners(eventName?: string): this;
   off: OnEvent<this>;
@@ -192,22 +192,22 @@ export interface NFTAave extends BaseContract {
       _maxDuration: PromiseOrValue<BigNumberish>,
       _compound: PromiseOrValue<boolean>,
       _collections: PromiseOrValue<string>[],
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     getPoolById(
       _poolId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<[NFTAave.PoolStructOutput]>;
 
     getPoolByOwner(
       _owner: PromiseOrValue<string>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<[NFTAave.PoolStructOutput]>;
 
     poolOwners(
       arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<[string]>;
 
     totalPools(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -221,22 +221,22 @@ export interface NFTAave extends BaseContract {
     _maxDuration: PromiseOrValue<BigNumberish>,
     _compound: PromiseOrValue<boolean>,
     _collections: PromiseOrValue<string>[],
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
+    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   getPoolById(
     _poolId: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<NFTAave.PoolStructOutput>;
 
   getPoolByOwner(
     _owner: PromiseOrValue<string>,
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<NFTAave.PoolStructOutput>;
 
   poolOwners(
     arg0: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<string>;
 
   totalPools(overrides?: CallOverrides): Promise<BigNumber>;
@@ -250,22 +250,22 @@ export interface NFTAave extends BaseContract {
       _maxDuration: PromiseOrValue<BigNumberish>,
       _compound: PromiseOrValue<boolean>,
       _collections: PromiseOrValue<string>[],
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<void>;
 
     getPoolById(
       _poolId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<NFTAave.PoolStructOutput>;
 
     getPoolByOwner(
       _owner: PromiseOrValue<string>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<NFTAave.PoolStructOutput>;
 
     poolOwners(
       arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<string>;
 
     totalPools(overrides?: CallOverrides): Promise<BigNumber>;
@@ -282,22 +282,22 @@ export interface NFTAave extends BaseContract {
       _maxDuration: PromiseOrValue<BigNumberish>,
       _compound: PromiseOrValue<boolean>,
       _collections: PromiseOrValue<string>[],
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     getPoolById(
       _poolId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getPoolByOwner(
       _owner: PromiseOrValue<string>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     poolOwners(
       arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     totalPools(overrides?: CallOverrides): Promise<BigNumber>;
@@ -312,22 +312,22 @@ export interface NFTAave extends BaseContract {
       _maxDuration: PromiseOrValue<BigNumberish>,
       _compound: PromiseOrValue<boolean>,
       _collections: PromiseOrValue<string>[],
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     getPoolById(
       _poolId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getPoolByOwner(
       _owner: PromiseOrValue<string>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     poolOwners(
       arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     totalPools(overrides?: CallOverrides): Promise<PopulatedTransaction>;

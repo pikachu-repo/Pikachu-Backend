@@ -10,83 +10,83 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from 'ethers';
-import type { FunctionFragment, Result } from '@ethersproject/abi';
-import type { Listener, Provider } from '@ethersproject/providers';
+} from "ethers";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from '../common';
+} from "../common";
 
 export interface VerifySignatureInterface extends utils.Interface {
   functions: {
-    'getEthSignedMessageHash(bytes32)': FunctionFragment;
-    'getMessageHash(address,uint256,uint256)': FunctionFragment;
-    'recoverSigner(bytes32,bytes)': FunctionFragment;
-    'splitSignature(bytes)': FunctionFragment;
-    'verify(address,address,uint256,uint256,bytes)': FunctionFragment;
+    "getEthSignedMessageHash(bytes32)": FunctionFragment;
+    "getMessageHash(address,uint256,uint256)": FunctionFragment;
+    "recoverSigner(bytes32,bytes)": FunctionFragment;
+    "splitSignature(bytes)": FunctionFragment;
+    "verify(address,address,uint256,uint256,bytes)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | 'getEthSignedMessageHash'
-      | 'getMessageHash'
-      | 'recoverSigner'
-      | 'splitSignature'
-      | 'verify',
+      | "getEthSignedMessageHash"
+      | "getMessageHash"
+      | "recoverSigner"
+      | "splitSignature"
+      | "verify"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: 'getEthSignedMessageHash',
-    values: [PromiseOrValue<BytesLike>],
+    functionFragment: "getEthSignedMessageHash",
+    values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
-    functionFragment: 'getMessageHash',
+    functionFragment: "getMessageHash",
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-    ],
+      PromiseOrValue<BigNumberish>
+    ]
   ): string;
   encodeFunctionData(
-    functionFragment: 'recoverSigner',
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BytesLike>],
+    functionFragment: "recoverSigner",
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
-    functionFragment: 'splitSignature',
-    values: [PromiseOrValue<BytesLike>],
+    functionFragment: "splitSignature",
+    values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
-    functionFragment: 'verify',
+    functionFragment: "verify",
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-    ],
+      PromiseOrValue<BytesLike>
+    ]
   ): string;
 
   decodeFunctionResult(
-    functionFragment: 'getEthSignedMessageHash',
-    data: BytesLike,
+    functionFragment: "getEthSignedMessageHash",
+    data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'getMessageHash',
-    data: BytesLike,
+    functionFragment: "getMessageHash",
+    data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'recoverSigner',
-    data: BytesLike,
+    functionFragment: "recoverSigner",
+    data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'splitSignature',
-    data: BytesLike,
+    functionFragment: "splitSignature",
+    data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: 'verify', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "verify", data: BytesLike): Result;
 
   events: {};
 }
@@ -101,15 +101,15 @@ export interface VerifySignature extends BaseContract {
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined,
+    toBlock?: string | number | undefined
   ): Promise<Array<TEvent>>;
 
   listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>,
+    eventFilter?: TypedEventFilter<TEvent>
   ): Array<TypedListener<TEvent>>;
   listeners(eventName?: string): Array<Listener>;
   removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>,
+    eventFilter: TypedEventFilter<TEvent>
   ): this;
   removeAllListeners(eventName?: string): this;
   off: OnEvent<this>;
@@ -120,25 +120,25 @@ export interface VerifySignature extends BaseContract {
   functions: {
     getEthSignedMessageHash(
       _messageHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<[string]>;
 
     getMessageHash(
       _collection: PromiseOrValue<string>,
       _floorPrice: PromiseOrValue<BigNumberish>,
       _blockNumber: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<[string]>;
 
     recoverSigner(
       _ethSignedMessageHash: PromiseOrValue<BytesLike>,
       _signature: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<[string]>;
 
     splitSignature(
       sig: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<[string, string, number] & { r: string; s: string; v: number }>;
 
     verify(
@@ -147,31 +147,31 @@ export interface VerifySignature extends BaseContract {
       _floorPrice: PromiseOrValue<BigNumberish>,
       _blockNumber: PromiseOrValue<BigNumberish>,
       signature: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<[boolean]>;
   };
 
   getEthSignedMessageHash(
     _messageHash: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<string>;
 
   getMessageHash(
     _collection: PromiseOrValue<string>,
     _floorPrice: PromiseOrValue<BigNumberish>,
     _blockNumber: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<string>;
 
   recoverSigner(
     _ethSignedMessageHash: PromiseOrValue<BytesLike>,
     _signature: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<string>;
 
   splitSignature(
     sig: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<[string, string, number] & { r: string; s: string; v: number }>;
 
   verify(
@@ -180,31 +180,31 @@ export interface VerifySignature extends BaseContract {
     _floorPrice: PromiseOrValue<BigNumberish>,
     _blockNumber: PromiseOrValue<BigNumberish>,
     signature: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<boolean>;
 
   callStatic: {
     getEthSignedMessageHash(
       _messageHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<string>;
 
     getMessageHash(
       _collection: PromiseOrValue<string>,
       _floorPrice: PromiseOrValue<BigNumberish>,
       _blockNumber: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<string>;
 
     recoverSigner(
       _ethSignedMessageHash: PromiseOrValue<BytesLike>,
       _signature: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<string>;
 
     splitSignature(
       sig: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<[string, string, number] & { r: string; s: string; v: number }>;
 
     verify(
@@ -213,7 +213,7 @@ export interface VerifySignature extends BaseContract {
       _floorPrice: PromiseOrValue<BigNumberish>,
       _blockNumber: PromiseOrValue<BigNumberish>,
       signature: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<boolean>;
   };
 
@@ -222,25 +222,25 @@ export interface VerifySignature extends BaseContract {
   estimateGas: {
     getEthSignedMessageHash(
       _messageHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getMessageHash(
       _collection: PromiseOrValue<string>,
       _floorPrice: PromiseOrValue<BigNumberish>,
       _blockNumber: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     recoverSigner(
       _ethSignedMessageHash: PromiseOrValue<BytesLike>,
       _signature: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     splitSignature(
       sig: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     verify(
@@ -249,32 +249,32 @@ export interface VerifySignature extends BaseContract {
       _floorPrice: PromiseOrValue<BigNumberish>,
       _blockNumber: PromiseOrValue<BigNumberish>,
       signature: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     getEthSignedMessageHash(
       _messageHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getMessageHash(
       _collection: PromiseOrValue<string>,
       _floorPrice: PromiseOrValue<BigNumberish>,
       _blockNumber: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     recoverSigner(
       _ethSignedMessageHash: PromiseOrValue<BytesLike>,
       _signature: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     splitSignature(
       sig: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     verify(
@@ -283,7 +283,7 @@ export interface VerifySignature extends BaseContract {
       _floorPrice: PromiseOrValue<BigNumberish>,
       _blockNumber: PromiseOrValue<BigNumberish>,
       signature: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }
