@@ -8,8 +8,8 @@ export class Loan {
   @Prop({ required: true })
   poolId: number;
 
-  @Prop({ required: true })
-  txHash: number;
+  @Prop({ required: true, index: true })
+  txHash: string;
 
   @Prop({ required: true })
   lender: string;

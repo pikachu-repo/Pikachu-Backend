@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-} from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 
 import { PoolService } from './pool.service';
 
@@ -21,7 +13,7 @@ export class LoanController {
 
   @Get('borrower/:borrower')
   async getLoansByBorrower(@Param('borrower') borrower: string) {
-    return await this.service.findLoansByBorrower(borrower);
+    return await this.service.findLoansByBorrower(borrower.toLowerCase());
   }
 
   @Get('pool/:poolId')
