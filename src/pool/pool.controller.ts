@@ -40,9 +40,4 @@ export class PoolController {
   async getSignature(@Param('collection') collection: string) {
     return await this.service.getSignature(collection);
   }
-
-  @Get(':poolId/loans')
-  async getLoansByPoolId(@Param('poolId') poolId: number) {
-    return await this.service.findLoansByPoolId(poolId);
-  }
 }

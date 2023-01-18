@@ -41,6 +41,10 @@ export class PoolService {
     return await this.loanModel.find({ poolId }).lean().exec();
   }
 
+  async findLoansByBorrower(borrower: string): Promise<Loan[]> {
+    return await this.loanModel.find({ borrower }).lean().exec();
+  }
+
   async getPikachuEvents(
     address: string,
     event: string | string[],
@@ -95,26 +99,33 @@ export class PoolService {
       startingBlock = setting.lastBlockHeight;
       endingBlock = Math.min(startingBlock + pageSize, lastBlockNumber);
 
-      const [createdEvents, loanEvents, repayEvents] = await Promise.all([
-        this.getPikachuEvents(
-          PikachuContract.address,
-          PikachuContract.filters.CreatedPool().topics[0],
-          startingBlock,
-          endingBlock,
-        ),
-        this.getPikachuEvents(
-          PikachuContract.address,
-          PikachuContract.filters.CreatedLoan().topics[0],
-          startingBlock,
-          endingBlock,
-        ),
-        this.getPikachuEvents(
-          PikachuContract.address,
-          PikachuContract.filters.RepayedLoan().topics[0],
-          startingBlock,
-          endingBlock,
-        ),
-      ]);
+      const [createdEvents, loanEvents, repayEvents, liquidateEvents] =
+        await Promise.all([
+          this.getPikachuEvents(
+            PikachuContract.address,
+            PikachuContract.filters.CreatedPool().topics[0],
+            startingBlock,
+            endingBlock,
+          ),
+          this.getPikachuEvents(
+            PikachuContract.address,
+            PikachuContract.filters.CreatedLoan().topics[0],
+            startingBlock,
+            endingBlock,
+          ),
+          this.getPikachuEvents(
+            PikachuContract.address,
+            PikachuContract.filters.RepayedLoan().topics[0],
+            startingBlock,
+            endingBlock,
+          ),
+          this.getPikachuEvents(
+            PikachuContract.address,
+            PikachuContract.filters.LiquidatedLoan().topics[0],
+            startingBlock,
+            endingBlock,
+          ),
+        ]);
 
       for (let i = 0; i < createdEvents.length; i++) {
         const event = createdEvents[i];
@@ -130,6 +141,7 @@ export class PoolService {
           {
             owner,
             blockHeight,
+            txHash: event.tx_hash,
             depositAmount,
             createdAt: new Date(event.block_signed_at),
           },
@@ -137,19 +149,28 @@ export class PoolService {
         );
       }
 
+      // console.log(loanEvents.length)
+
       for (let i = 0; i < loanEvents.length; i++) {
         const event = loanEvents[i];
         const poolId = toInteger(event[1]);
-        const amount = toFloat(ethers.utils.formatEther(event.raw_log_data));
+        // const amount = toFloat(ethers.utils.formatEther(event.raw_log_data));
         const borrower = `0x${event.raw_log_topics[2].slice(-40)}`;
-        await this.updateLoan(poolId, borrower);
+        await this.updateLoan(poolId, borrower, event.tx_hash);
       }
 
       for (let i = 0; i < repayEvents.length; i++) {
         const event = repayEvents[i];
         const poolId = toInteger(event[1]);
         const borrower = `0x${event.raw_log_topics[2].slice(-40)}`;
-        await this.updateLoan(poolId, borrower, true);
+        await this.updateLoan(poolId, borrower);
+      }
+
+      for (let i = 0; i < liquidateEvents.length; i++) {
+        const event = liquidateEvents[i];
+        const poolId = toInteger(event[1]);
+        const borrower = `0x${event.raw_log_topics[2].slice(-40)}`;
+        await this.updateLoan(poolId, borrower);
       }
 
       setting.lastBlockHeight = endingBlock + 1;
@@ -157,26 +178,31 @@ export class PoolService {
     } while (endingBlock < lastBlockNumber);
   }
 
-  async updateLoan(poolId: number, borrower: string, repayed = false) {
+  async updateLoan(poolId: number, borrower: string, txHash?: string) {
     const loan = await PikachuContract.loans(poolId, borrower);
-    const loneObj = await this.loanModel.findOneAndUpdate(
-      { poolId, borrower },
-      {
-        poolId,
-        borrower: loan.borrower.toLowerCase(),
-        collectionContract: loan.collection.toLowerCase(),
-        timestamp: loan.timestamp.toNumber() * 1000,
-        amount: toFloat(ethers.utils.formatEther(loan.amount)),
-        duration: loan.duration.toNumber(),
-        tokenId: loan.tokenId.toNumber(),
-        status: loan.status,
-        blockNumber: loan.blockNumber.toNumber(),
-        interestType: loan.interestType,
-        interestStartRate: loan.interestStartRate.toNumber() / 100,
-        interestCapRate: loan.interestCapRate.toNumber() / 100,
-      },
-      { upsert: true, new: true },
-    );
+    const search: any = { poolId, borrower };
+    const obj: any = {
+      poolId,
+      borrower: loan.borrower.toLowerCase(),
+      collectionContract: loan.collection.toLowerCase(),
+      timestamp: loan.timestamp.toNumber() * 1000,
+      amount: toFloat(ethers.utils.formatEther(loan.amount)),
+      duration: loan.duration.toNumber(),
+      tokenId: loan.tokenId.toNumber(),
+      status: loan.status,
+      blockNumber: loan.blockNumber.toNumber(),
+      interestType: loan.interestType,
+      interestStartRate: loan.interestStartRate.toNumber() / 100,
+      interestCapRate: loan.interestCapRate.toNumber() / 100,
+    };
+    if (txHash) {
+      obj.txHash = txHash;
+      search.txHash = txHash;
+    }
+    const loneObj = await this.loanModel.findOneAndUpdate(search, obj, {
+      upsert: true,
+      new: true,
+    });
     return loneObj;
   }
 
@@ -188,20 +214,12 @@ export class PoolService {
   }
 
   async fetchCollections() {
-    let adminSetting: TAdminSettingStruct = {
-      feeTo: '',
-      minDepositAmount: 0,
-      platformFee: 0,
-      blockNumberSlippage: 300,
-      verifiedCollections: [],
-    };
-
     const [_adminSetting, verifiedCollections] = await Promise.all([
       PikachuContract.adminSetting(),
       PikachuContract.verifiedCollections(),
     ]);
 
-    adminSetting = { ..._adminSetting, verifiedCollections };
+    // const adminSetting = { ..._adminSetting, verifiedCollections };
 
     for (let collection of verifiedCollections) {
       await this.fetchCollection(collection);

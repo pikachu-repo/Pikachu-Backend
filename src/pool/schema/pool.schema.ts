@@ -8,6 +8,9 @@ export class Pool {
   @Prop({ required: true, index: true })
   poolId: number;
 
+  @Prop({ required: true, index: true })
+  txHash: string;
+
   @Prop({ required: true })
   owner: string;
 

@@ -9,6 +9,9 @@ export class Loan {
   poolId: number;
 
   @Prop({ required: true })
+  txHash: number;
+
+  @Prop({ required: true })
   lender: string;
 
   @Prop({ required: true })
