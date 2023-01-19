@@ -20,4 +20,15 @@ export class LoanController {
   async getLoansByPoolId(@Param('poolId') poolId: number) {
     return await this.service.findLoansByPoolId(poolId);
   }
+
+  @Get(':poolId/:borrower')
+  async getLoansByPoolIdAndBorrower(
+    @Param('poolId') poolId: number,
+    @Param('borrower') borrower: string,
+  ) {
+    return await this.service.findLoansByPoolIdAndBorrower(
+      poolId,
+      borrower.toLowerCase(),
+    );
+  }
 }

@@ -40,6 +40,15 @@ export class PoolService {
   async findLoansByPoolId(poolId: number): Promise<Loan[]> {
     return await this.loanModel.find({ poolId }).lean().exec();
   }
+  async findLoansByPoolIdAndBorrower(
+    poolId: number,
+    borrower: string,
+  ): Promise<Loan> {
+    return await this.loanModel
+      .findOne({ poolId, borrower }, {}, { sort: { blockNumber: -1 } })
+      .lean()
+      .exec();
+  }
 
   async findLoansByBorrower(borrower: string): Promise<Loan[]> {
     return await this.loanModel.find({ borrower }).lean().exec();
@@ -88,7 +97,7 @@ export class PoolService {
     }
   }
 
-  async fetchPools() {
+  async fetchPools(offset = 0) {
     const pageSize = 10 ** 6;
     const [setting, lastBlockNumber] = await Promise.all([
       this.settingModel.findOne(),
@@ -96,7 +105,7 @@ export class PoolService {
     ]);
     let startingBlock, endingBlock;
     do {
-      startingBlock = setting.lastBlockHeight;
+      startingBlock = setting.lastBlockHeight - offset;
       endingBlock = Math.min(startingBlock + pageSize, lastBlockNumber);
 
       const [createdEvents, loanEvents, repayEvents, liquidateEvents] =
@@ -156,21 +165,25 @@ export class PoolService {
         const poolId = toInteger(event[1]);
         // const amount = toFloat(ethers.utils.formatEther(event.raw_log_data));
         const borrower = `0x${event.raw_log_topics[2].slice(-40)}`;
-        await this.updateLoan(poolId, borrower, event.tx_hash);
+        await this.updateLoan(poolId, borrower, { txHash: event.tx_hash });
       }
 
       for (let i = 0; i < repayEvents.length; i++) {
         const event = repayEvents[i];
         const poolId = toInteger(event[1]);
         const borrower = `0x${event.raw_log_topics[2].slice(-40)}`;
-        await this.updateLoan(poolId, borrower);
+        await this.updateLoan(poolId, borrower, {
+          repaidAt: new Date(event.block_signed_at),
+        });
       }
 
       for (let i = 0; i < liquidateEvents.length; i++) {
         const event = liquidateEvents[i];
         const poolId = toInteger(event[1]);
         const borrower = `0x${event.raw_log_topics[2].slice(-40)}`;
-        await this.updateLoan(poolId, borrower);
+        await this.updateLoan(poolId, borrower, {
+          repaidAt: new Date(event.block_signed_at),
+        });
       }
 
       setting.lastBlockHeight = endingBlock + 1;
@@ -178,10 +191,10 @@ export class PoolService {
     } while (endingBlock < lastBlockNumber);
   }
 
-  async updateLoan(poolId: number, borrower: string, txHash?: string) {
+  async updateLoan(poolId: number, borrower: string, additional?: any) {
     const loan = await PikachuContract.loans(poolId, borrower);
     const search: any = { poolId, borrower };
-    const obj: any = {
+    let obj: any = {
       poolId,
       borrower: loan.borrower.toLowerCase(),
       collectionContract: loan.collection.toLowerCase(),
@@ -195,11 +208,14 @@ export class PoolService {
       interestStartRate: loan.interestStartRate.toNumber() / 100,
       interestCapRate: loan.interestCapRate.toNumber() / 100,
     };
-    if (txHash) {
-      obj.txHash = txHash;
-      search.txHash = txHash;
+    if (additional) {
+      obj = { ...obj, ...additional };
+      if (additional.txHash) search.txHash = additional.txHash;
     }
     const loneObj = await this.loanModel.findOneAndUpdate(search, obj, {
+      sort: {
+        blockNumber: -1,
+      },
       upsert: true,
       new: true,
     });

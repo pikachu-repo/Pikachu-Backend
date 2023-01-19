@@ -32,6 +32,9 @@ export class Loan {
   @Prop({ required: true, default: 0 })
   status: number;
 
+  @Prop({ required: true, default: new Date(0) })
+  repaidAt: Date;
+
   @Prop({ required: true })
   blockNumber: number;
 
