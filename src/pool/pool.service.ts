@@ -17,6 +17,14 @@ import { TAdminSettingStruct } from 'src/interfaces/contract.intefaces';
 import alchemy from 'src/helpers/apis/alchemy.api';
 import { Collection, CollectionDocument } from './schema/collection.schema';
 
+type Event = {
+  block_height: number;
+  block_signed_at: string;
+  raw_log_data: string;
+  raw_log_topics: string[];
+  sender_address: string;
+  tx_hash: string;
+};
 @Injectable()
 export class PoolService {
   constructor(
@@ -59,16 +67,7 @@ export class PoolService {
     event: string | string[],
     startingBlock: number,
     endingBlock: number,
-  ): Promise<
-    {
-      block_height: number;
-      block_signed_at: string;
-      raw_log_data: string;
-      raw_log_topics: string[];
-      sender_address: string;
-      tx_hash: string;
-    }[]
-  > {
+  ): Promise<Event[]> {
     try {
       let result = await fetch(
         `https://api.covalenthq.com/v1/80001/events/topics/${event}/?quote-currency=USD&format=JSON&starting-block=${startingBlock}&ending-block=${endingBlock}&sender-address=${address}&page-number=&key=${CONVALENTQ_KEY}`,
@@ -158,32 +157,26 @@ export class PoolService {
         );
       }
 
-      // console.log(loanEvents.length)
-
       for (let i = 0; i < loanEvents.length; i++) {
         const event = loanEvents[i];
         const poolId = toInteger(event[1]);
         // const amount = toFloat(ethers.utils.formatEther(event.raw_log_data));
         const borrower = `0x${event.raw_log_topics[2].slice(-40)}`;
-        await this.updateLoan(poolId, borrower, { txHash: event.tx_hash });
+        await this.handleCreateLoanEvent(poolId, borrower, event);
       }
 
       for (let i = 0; i < repayEvents.length; i++) {
         const event = repayEvents[i];
         const poolId = toInteger(event[1]);
         const borrower = `0x${event.raw_log_topics[2].slice(-40)}`;
-        await this.updateLoan(poolId, borrower, {
-          repaidAt: new Date(event.block_signed_at),
-        });
+        await this.handleRepayEvent(poolId, borrower, event);
       }
 
       for (let i = 0; i < liquidateEvents.length; i++) {
         const event = liquidateEvents[i];
         const poolId = toInteger(event[1]);
         const borrower = `0x${event.raw_log_topics[2].slice(-40)}`;
-        await this.updateLoan(poolId, borrower, {
-          repaidAt: new Date(event.block_signed_at),
-        });
+        await this.handleLiquidateEvent(poolId, borrower, event);
       }
 
       setting.lastBlockHeight = endingBlock + 1;
@@ -191,9 +184,9 @@ export class PoolService {
     } while (endingBlock < lastBlockNumber);
   }
 
-  async updateLoan(poolId: number, borrower: string, additional?: any) {
+  async handleCreateLoanEvent(poolId: number, borrower: string, event: Event) {
     const loan = await PikachuContract.loans(poolId, borrower);
-    const search: any = { poolId, borrower };
+
     let obj: any = {
       poolId,
       borrower: loan.borrower.toLowerCase(),
@@ -207,18 +200,85 @@ export class PoolService {
       interestType: loan.interestType,
       interestStartRate: loan.interestStartRate.toNumber() / 100,
       interestCapRate: loan.interestCapRate.toNumber() / 100,
+      txHash: event.tx_hash,
     };
-    if (additional) {
-      obj = { ...obj, ...additional };
-      if (additional.txHash) search.txHash = additional.txHash;
-    }
-    const loneObj = await this.loanModel.findOneAndUpdate(search, obj, {
-      sort: {
-        blockNumber: -1,
+    const loneObj = await this.loanModel.findOneAndUpdate(
+      {
+        poolId,
+        borrower,
+        // txHash: event.tx_hash,
       },
-      upsert: true,
-      new: true,
-    });
+      obj,
+      {
+        sort: {
+          blockNumber: -1,
+        },
+        upsert: true,
+        new: true,
+      },
+    );
+    return loneObj;
+  }
+
+  async handleRepayEvent(poolId: number, borrower: string, event: Event) {
+    const loan = await PikachuContract.loans(poolId, borrower);
+    let obj: any = {
+      poolId,
+      borrower: loan.borrower.toLowerCase(),
+      collectionContract: loan.collection.toLowerCase(),
+      timestamp: loan.timestamp.toNumber() * 1000,
+      amount: toFloat(ethers.utils.formatEther(loan.amount)),
+      duration: loan.duration.toNumber(),
+      tokenId: loan.tokenId.toNumber(),
+      status: loan.status,
+      blockNumber: loan.blockNumber.toNumber(),
+      interestType: loan.interestType,
+      interestStartRate: loan.interestStartRate.toNumber() / 100,
+      interestCapRate: loan.interestCapRate.toNumber() / 100,
+      repaidAt: new Date(event.block_signed_at),
+    };
+
+    const loneObj = await this.loanModel.findOneAndUpdate(
+      { poolId, borrower, status: 1 },
+      obj,
+      {
+        sort: {
+          blockNumber: 1,
+        },
+        new: true,
+      },
+    );
+    return loneObj;
+  }
+
+  async handleLiquidateEvent(poolId: number, borrower: string, event: Event) {
+    const loan = await PikachuContract.loans(poolId, borrower);
+    let obj: any = {
+      poolId,
+      borrower: loan.borrower.toLowerCase(),
+      collectionContract: loan.collection.toLowerCase(),
+      timestamp: loan.timestamp.toNumber() * 1000,
+      amount: toFloat(ethers.utils.formatEther(loan.amount)),
+      duration: loan.duration.toNumber(),
+      tokenId: loan.tokenId.toNumber(),
+      status: loan.status,
+      blockNumber: loan.blockNumber.toNumber(),
+      interestType: loan.interestType,
+      interestStartRate: loan.interestStartRate.toNumber() / 100,
+      interestCapRate: loan.interestCapRate.toNumber() / 100,
+      repaidAt: new Date(event.block_signed_at),
+    };
+
+    const loneObj = await this.loanModel.findOneAndUpdate(
+      { poolId, borrower, status: 1 },
+      obj,
+      {
+        sort: {
+          blockNumber: 1,
+        },
+        new: true,
+      },
+    );
     return loneObj;
   }
 

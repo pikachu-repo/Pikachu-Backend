@@ -9,11 +9,11 @@ export class TasksService {
 
   @Cron('0 * * * * *')
   taskFetchPools() {
-    this.poolService.fetchPools();
+    // this.poolService.fetchPools(1000);
   }
 
   @Cron('3 * * * * *')
   taskFetchCollections() {
-    this.poolService.fetchCollections();
+    // this.poolService.fetchCollections();
   }
 }
