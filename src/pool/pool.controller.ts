@@ -13,6 +13,7 @@ export class PoolController {
 
   @Get('update')
   async updatePools() {
+    this.service.fetchCollections();
     return await this.service.fetchPools(100000);
   }
 

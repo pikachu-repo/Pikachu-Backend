@@ -6,10 +6,16 @@ import {
   CONVALENTQ_KEY,
   ethersProvider,
   ethersSigner,
+  PIKACHU_NETWORK,
 } from 'src/helpers/provider.constants';
 import fetch from 'node-fetch';
 import { BigNumber, BigNumberish, ethers } from 'ethers';
-import { toFloat, toInteger, toString } from 'src/helpers/string.helpers';
+import {
+  formatEther,
+  toFloat,
+  toInteger,
+  toString,
+} from 'src/helpers/string.helpers';
 import { Setting, SettingDocument } from './schema/setting.schema';
 import { Pool, PoolDocument } from './schema/pool.schema';
 import { Loan, LoanDocument } from './schema/loan.schema';
@@ -42,20 +48,37 @@ export class PoolService {
   ) {}
 
   async findAll(): Promise<any> {
+    // await this.settingModel.create({
+    //   lastBlockHeight: 29000000,
+    // });
     return await this.fetchPools();
   }
 
   async findLoansByPoolId(poolId: number): Promise<Loan[]> {
     return await this.loanModel.find({ poolId }).lean().exec();
   }
+
   async findLoansByPoolIdAndBorrower(
     poolId: number,
     borrower: string,
-  ): Promise<Loan> {
+  ): Promise<Loan[]> {
     return await this.loanModel
+      .find({ poolId, borrower }, {}, { sort: { blockNumber: 1 } })
+      .lean()
+      .exec();
+  }
+
+  async findLoanByPoolIdAndBorrower(
+    poolId: number,
+    borrower: string,
+  ): Promise<Loan> {
+    const result = await this.loanModel
       .findOne({ poolId, borrower }, {}, { sort: { blockNumber: -1 } })
       .lean()
       .exec();
+    if (!result)
+      throw new HttpException('LOAN_C:LOAN_NOT_FOUND', HttpStatus.NOT_FOUND);
+    return;
   }
 
   async findLoansByBorrower(borrower: string): Promise<Loan[]> {
@@ -70,11 +93,14 @@ export class PoolService {
   ): Promise<Event[]> {
     try {
       let result = await fetch(
-        `https://api.covalenthq.com/v1/80001/events/topics/${event}/?quote-currency=USD&format=JSON&starting-block=${startingBlock}&ending-block=${endingBlock}&sender-address=${address}&page-number=&key=${CONVALENTQ_KEY}`,
+        `https://api.covalenthq.com/v1/${PIKACHU_NETWORK.id}/events/topics/${event}/?format=JSON&starting-block=${startingBlock}&ending-block=${endingBlock}&sender-address=${address}&page-number=&key=${CONVALENTQ_KEY}`,
       );
 
       result = await result.json();
-      if (result.error === true) return [];
+      if (result.error === true) {
+        console.log(result);
+        return [];
+      }
       return result.data.items;
     } catch (error) {
       console.log(error);
@@ -84,12 +110,18 @@ export class PoolService {
   async getLastBlockHeight(): Promise<number> {
     try {
       let result = await fetch(
-        `https://api.covalenthq.com/v1/80001/block_v2/latest/?quote-currency=USD&format=JSON&key=${CONVALENTQ_KEY}`,
+        `https://api.covalenthq.com/v1/chains/status/?key=${CONVALENTQ_KEY}`,
       );
 
       result = await result.json();
-      if (result.error === true) return 0;
-      return result.data.items[0].height;
+      if (result.error === true) {
+        console.log('112: error: ', result);
+        return 0;
+      }
+
+      return result.data.items.find(
+        (item) => item.chain_id === PIKACHU_NETWORK.id.toString(),
+      ).synced_block_height;
     } catch (error) {
       console.log(error);
       return 0;
@@ -103,6 +135,7 @@ export class PoolService {
       this.getLastBlockHeight(),
     ]);
     let startingBlock, endingBlock;
+
     do {
       startingBlock = setting.lastBlockHeight - offset;
       endingBlock = Math.min(startingBlock + pageSize, lastBlockNumber);
@@ -165,6 +198,8 @@ export class PoolService {
         await this.handleCreateLoanEvent(poolId, borrower, event);
       }
 
+      console.log(repayEvents.length);
+
       for (let i = 0; i < repayEvents.length; i++) {
         const event = repayEvents[i];
         const poolId = toInteger(event[1]);
@@ -185,28 +220,36 @@ export class PoolService {
   }
 
   async handleCreateLoanEvent(poolId: number, borrower: string, event: Event) {
-    const loan = await PikachuContract.loans(poolId, borrower);
+    const amount = formatEther(BigNumber.from(event.raw_log_data.slice(0, 66)));
+    const collection = `0x${event.raw_log_data.slice(90, 130)}`;
+    const tokenId = parseInt(`0x${event.raw_log_data.slice(130, 194)}`);
+    const interestType = parseInt(`0x${event.raw_log_data.slice(194, 258)}`);
+    const interestStartRate = parseInt(
+      `0x${event.raw_log_data.slice(258, 322)}`,
+    );
+    const interestCapRate = parseInt(`0x${event.raw_log_data.slice(322, 386)}`);
+    const duration = parseInt(`0x${event.raw_log_data.slice(386, 450)}`);
 
-    let obj: any = {
+    const obj: any = {
       poolId,
-      borrower: loan.borrower.toLowerCase(),
-      collectionContract: loan.collection.toLowerCase(),
-      timestamp: loan.timestamp.toNumber() * 1000,
-      amount: toFloat(ethers.utils.formatEther(loan.amount)),
-      duration: loan.duration.toNumber(),
-      tokenId: loan.tokenId.toNumber(),
-      status: loan.status,
-      blockNumber: loan.blockNumber.toNumber(),
-      interestType: loan.interestType,
-      interestStartRate: loan.interestStartRate.toNumber() / 100,
-      interestCapRate: loan.interestCapRate.toNumber() / 100,
+      borrower,
+      collectionContract: collection.toLowerCase(),
+      timestamp: new Date(event.block_signed_at),
+      amount,
+      duration,
+      tokenId,
+      status: 1, // borrowed
+      blockNumber: event.block_height,
+      interestType: interestType,
+      interestStartRate: interestStartRate / 100,
+      interestCapRate: interestCapRate / 100,
       txHash: event.tx_hash,
     };
     const loneObj = await this.loanModel.findOneAndUpdate(
       {
         poolId,
         borrower,
-        // txHash: event.tx_hash,
+        txHash: event.tx_hash,
       },
       obj,
       {
@@ -221,29 +264,19 @@ export class PoolService {
   }
 
   async handleRepayEvent(poolId: number, borrower: string, event: Event) {
-    const loan = await PikachuContract.loans(poolId, borrower);
-    let obj: any = {
+    const obj: any = {
       poolId,
-      borrower: loan.borrower.toLowerCase(),
-      collectionContract: loan.collection.toLowerCase(),
-      timestamp: loan.timestamp.toNumber() * 1000,
-      amount: toFloat(ethers.utils.formatEther(loan.amount)),
-      duration: loan.duration.toNumber(),
-      tokenId: loan.tokenId.toNumber(),
-      status: loan.status,
-      blockNumber: loan.blockNumber.toNumber(),
-      interestType: loan.interestType,
-      interestStartRate: loan.interestStartRate.toNumber() / 100,
-      interestCapRate: loan.interestCapRate.toNumber() / 100,
+      borrower,
+      status: 2,
       repaidAt: new Date(event.block_signed_at),
     };
 
     const loneObj = await this.loanModel.findOneAndUpdate(
-      { poolId, borrower, status: 1 },
+      { poolId, borrower, blockNumber: { $lte: event.block_height } },
       obj,
       {
         sort: {
-          blockNumber: 1,
+          blockNumber: -1,
         },
         new: true,
       },
@@ -252,29 +285,19 @@ export class PoolService {
   }
 
   async handleLiquidateEvent(poolId: number, borrower: string, event: Event) {
-    const loan = await PikachuContract.loans(poolId, borrower);
-    let obj: any = {
+    const obj: any = {
       poolId,
-      borrower: loan.borrower.toLowerCase(),
-      collectionContract: loan.collection.toLowerCase(),
-      timestamp: loan.timestamp.toNumber() * 1000,
-      amount: toFloat(ethers.utils.formatEther(loan.amount)),
-      duration: loan.duration.toNumber(),
-      tokenId: loan.tokenId.toNumber(),
-      status: loan.status,
-      blockNumber: loan.blockNumber.toNumber(),
-      interestType: loan.interestType,
-      interestStartRate: loan.interestStartRate.toNumber() / 100,
-      interestCapRate: loan.interestCapRate.toNumber() / 100,
+      borrower,
+      status: 3,
       repaidAt: new Date(event.block_signed_at),
     };
 
     const loneObj = await this.loanModel.findOneAndUpdate(
-      { poolId, borrower, status: 1 },
+      { poolId, borrower, blockNumber: { $lte: event.block_height } },
       obj,
       {
         sort: {
-          blockNumber: 1,
+          blockNumber: -1,
         },
         new: true,
       },
@@ -297,7 +320,7 @@ export class PoolService {
 
     // const adminSetting = { ..._adminSetting, verifiedCollections };
 
-    for (let collection of verifiedCollections) {
+    for (const collection of verifiedCollections) {
       await this.fetchCollection(collection);
     }
   }

@@ -441,7 +441,7 @@ export interface PikachuInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "CreatedLoan(uint256,address,uint256)": EventFragment;
+    "CreatedLoan(uint256,address,uint256,address,uint256,uint8,uint256,uint256,uint256)": EventFragment;
     "CreatedPool(address,uint256,uint256)": EventFragment;
     "LiquidatedLoan(uint256,address,uint256)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
@@ -461,9 +461,25 @@ export interface CreatedLoanEventObject {
   poolId: BigNumber;
   borrower: string;
   amount: BigNumber;
+  collection: string;
+  tokenId: BigNumber;
+  interestType: number;
+  interestStartRate: BigNumber;
+  interestCapRate: BigNumber;
+  duration: BigNumber;
 }
 export type CreatedLoanEvent = TypedEvent<
-  [BigNumber, string, BigNumber],
+  [
+    BigNumber,
+    string,
+    BigNumber,
+    string,
+    BigNumber,
+    number,
+    BigNumber,
+    BigNumber,
+    BigNumber
+  ],
   CreatedLoanEventObject
 >;
 
@@ -1162,15 +1178,27 @@ export interface Pikachu extends BaseContract {
   };
 
   filters: {
-    "CreatedLoan(uint256,address,uint256)"(
+    "CreatedLoan(uint256,address,uint256,address,uint256,uint8,uint256,uint256,uint256)"(
       poolId?: PromiseOrValue<BigNumberish> | null,
       borrower?: PromiseOrValue<string> | null,
-      amount?: null
+      amount?: null,
+      collection?: null,
+      tokenId?: null,
+      interestType?: null,
+      interestStartRate?: null,
+      interestCapRate?: null,
+      duration?: null
     ): CreatedLoanEventFilter;
     CreatedLoan(
       poolId?: PromiseOrValue<BigNumberish> | null,
       borrower?: PromiseOrValue<string> | null,
-      amount?: null
+      amount?: null,
+      collection?: null,
+      tokenId?: null,
+      interestType?: null,
+      interestStartRate?: null,
+      interestCapRate?: null,
+      duration?: null
     ): CreatedLoanEventFilter;
 
     "CreatedPool(address,uint256,uint256)"(
