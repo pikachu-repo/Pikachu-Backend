@@ -47,11 +47,15 @@ export class PoolService {
     private readonly loanModel: Model<LoanDocument>,
   ) {}
 
-  async findAll(): Promise<any> {
+  async findAllPools(): Promise<any> {
+    return await this.poolModel.find({}).lean().exec();
     // await this.settingModel.create({
     //   lastBlockHeight: 29000000,
     // });
-    return await this.fetchPools();
+    // return await this.fetchPools();
+  }
+  async findAllLoans(): Promise<any> {
+    return await this.loanModel.find({}).lean().exec();
   }
 
   async findLoansByPoolId(poolId: number): Promise<Loan[]> {
@@ -98,7 +102,7 @@ export class PoolService {
 
       result = await result.json();
       if (result.error === true) {
-        console.log(result);
+        console.log(result.error_code, endingBlock);
         return [];
       }
       return result.data.items;
@@ -123,7 +127,7 @@ export class PoolService {
         (item) => item.chain_id === PIKACHU_NETWORK.id.toString(),
       ).synced_block_height;
     } catch (error) {
-      console.log(error);
+      console.log('126: ', error);
       return 0;
     }
   }
@@ -140,68 +144,67 @@ export class PoolService {
       startingBlock = setting.lastBlockHeight - offset;
       endingBlock = Math.min(startingBlock + pageSize, lastBlockNumber);
 
-      const [createdEvents, loanEvents, repayEvents, liquidateEvents] =
-        await Promise.all([
-          this.getPikachuEvents(
-            PikachuContract.address,
-            PikachuContract.filters.CreatedPool().topics[0],
-            startingBlock,
-            endingBlock,
-          ),
-          this.getPikachuEvents(
-            PikachuContract.address,
-            PikachuContract.filters.CreatedLoan().topics[0],
-            startingBlock,
-            endingBlock,
-          ),
-          this.getPikachuEvents(
-            PikachuContract.address,
-            PikachuContract.filters.RepayedLoan().topics[0],
-            startingBlock,
-            endingBlock,
-          ),
-          this.getPikachuEvents(
-            PikachuContract.address,
-            PikachuContract.filters.LiquidatedLoan().topics[0],
-            startingBlock,
-            endingBlock,
-          ),
-        ]);
+      const [
+        poolCreationEvents,
+        poolUpdateEvents,
+        loanCreationEvents,
+        loanRepayEvents,
+        liquidateEvents,
+      ] = await Promise.all([
+        this.getPikachuEvents(
+          PikachuContract.address,
+          PikachuContract.filters.CreatedPool().topics[0],
+          startingBlock,
+          endingBlock,
+        ),
+        this.getPikachuEvents(
+          PikachuContract.address,
+          PikachuContract.filters.UpdatedPool().topics[0],
+          startingBlock,
+          endingBlock,
+        ),
+        this.getPikachuEvents(
+          PikachuContract.address,
+          PikachuContract.filters.CreatedLoan().topics[0],
+          startingBlock,
+          endingBlock,
+        ),
+        this.getPikachuEvents(
+          PikachuContract.address,
+          PikachuContract.filters.RepayedLoan().topics[0],
+          startingBlock,
+          endingBlock,
+        ),
+        this.getPikachuEvents(
+          PikachuContract.address,
+          PikachuContract.filters.LiquidatedLoan().topics[0],
+          startingBlock,
+          endingBlock,
+        ),
+      ]);
 
-      for (let i = 0; i < createdEvents.length; i++) {
-        const event = createdEvents[i];
-        const owner = `0x${event.raw_log_topics[1].slice(-40)}`;
+      for (let i = 0; i < poolCreationEvents.length; i++) {
+        const event = poolCreationEvents[i];
         const poolId = toInteger(event.raw_log_topics[2]);
-        const depositAmount = toFloat(
-          ethers.utils.formatEther(event.raw_log_data),
-        );
-        const blockHeight = event.block_height;
-
-        await this.poolModel.findOneAndUpdate(
-          { poolId },
-          {
-            owner,
-            blockHeight,
-            txHash: event.tx_hash,
-            depositAmount,
-            createdAt: new Date(event.block_signed_at),
-          },
-          { upsert: true },
-        );
+        await this.handlePoolUpdateEvent(poolId, event);
       }
 
-      for (let i = 0; i < loanEvents.length; i++) {
-        const event = loanEvents[i];
+      for (let i = 0; i < poolUpdateEvents.length; i++) {
+        const event = poolUpdateEvents[i];
+        const poolId = toInteger(event.raw_log_topics[2]);
+        await this.handlePoolUpdateEvent(poolId, event, false);
+      }
+
+      for (let i = 0; i < loanCreationEvents.length; i++) {
+        const event = loanCreationEvents[i];
         const poolId = toInteger(event[1]);
         // const amount = toFloat(ethers.utils.formatEther(event.raw_log_data));
         const borrower = `0x${event.raw_log_topics[2].slice(-40)}`;
         await this.handleCreateLoanEvent(poolId, borrower, event);
       }
 
-      console.log(repayEvents.length);
-
-      for (let i = 0; i < repayEvents.length; i++) {
-        const event = repayEvents[i];
+      for (let i = 0; i < loanRepayEvents.length; i++) {
+        const event = loanRepayEvents[i];
         const poolId = toInteger(event[1]);
         const borrower = `0x${event.raw_log_topics[2].slice(-40)}`;
         await this.handleRepayEvent(poolId, borrower, event);
@@ -219,6 +222,60 @@ export class PoolService {
     } while (endingBlock < lastBlockNumber);
   }
 
+  async handlePoolUpdateEvent(
+    poolId: number,
+    event: Event,
+    isCreation: boolean = true,
+  ) {
+    const pool = await PikachuContract.getPoolById(poolId);
+    console.log('pool:', formatEther(pool.depositedAmount));
+    const poolObj = await this.poolModel.findOneAndUpdate(
+      {
+        poolId,
+      },
+      {
+        owner: pool.owner.toLowerCase(),
+        paused: pool.paused,
+        depositedAmount: formatEther(pool.depositedAmount),
+        borrowedAmount: formatEther(pool.borrowedAmount),
+        availableAmount: formatEther(pool.availableAmount),
+        nftLocked: toInteger(pool.nftLocked),
+        totalLiquidations: formatEther(pool.totalLiquidations),
+        totalLoans: formatEther(pool.totalLoans),
+        totalInterest: formatEther(pool.totalInterest),
+        loanToValue: toInteger(pool.loanToValue),
+        maxAmount: formatEther(pool.maxAmount),
+        interestType: toInteger(pool.interestType),
+        interestStartRate: toInteger(pool.interestStartRate),
+        interestCapRate: toInteger(pool.interestCapRate),
+        maxDuration: toInteger(pool.maxDuration),
+        compound: pool.compound,
+        collections: pool.collections.map((item) => item.toLowerCase()),
+
+        numberOfLoans: toInteger(pool.numberOfLoans),
+        numberOfOpenLoans: toInteger(pool.numberOfOpenLoans),
+        numberOfLiquidations: toInteger(pool.numberOfLiquidations),
+
+        depositedAt: toInteger(pool.depositedAt) * 1000,
+        updatedAt: toInteger(pool.updatedAt) * 1000,
+        lastLoanAt: toInteger(pool.lastLoanAt) * 1000,
+
+        ...(isCreation && {
+          blockHeight: event.block_height,
+          createdAt: new Date(event.block_signed_at),
+          txHash: event.tx_hash,
+        }),
+      },
+      {
+        sort: {
+          blockNumber: -1,
+        },
+        upsert: true,
+        new: true,
+      },
+    );
+    return poolObj;
+  }
   async handleCreateLoanEvent(poolId: number, borrower: string, event: Event) {
     const amount = formatEther(BigNumber.from(event.raw_log_data.slice(0, 66)));
     const collection = `0x${event.raw_log_data.slice(90, 130)}`;
@@ -327,6 +384,7 @@ export class PoolService {
 
   async fetchCollection(collection: string) {
     const metadata = await alchemy.nft.getContractMetadata(collection);
+    console.log(metadata);
     try {
       const obj = await this.collectionModel.findOneAndUpdate(
         { contract: collection.toLowerCase() },
@@ -341,7 +399,7 @@ export class PoolService {
           imageUrl: toString(metadata.openSea?.imageUrl),
           externalUrl: toString(metadata.openSea?.externalUrl),
           floorPrice:
-            toFloat(metadata.openSea?.floorPrice) + Math.random() * 0.25,
+            toFloat(metadata.openSea?.floorPrice) + Math.random() * 35,
         },
         { upsert: true, new: true },
       );

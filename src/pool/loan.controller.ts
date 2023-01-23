@@ -8,7 +8,7 @@ export class LoanController {
 
   @Get()
   async index() {
-    // return await this.service.findAllLoans();
+    return await this.service.findAllLoans();
   }
 
   @Get('borrower/:borrower')

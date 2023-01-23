@@ -8,13 +8,15 @@ export class PoolController {
 
   @Get()
   async index() {
-    return await this.service.findAll();
+    return await this.service.findAllPools();
   }
 
   @Get('update')
   async updatePools() {
-    this.service.fetchCollections();
-    return await this.service.fetchPools(100000);
+    await Promise.all([
+      this.service.fetchPools(100000),
+      this.service.fetchCollections(),
+    ]);
   }
 
   @Get('collection/:address')

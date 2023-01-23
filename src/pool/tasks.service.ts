@@ -7,13 +7,13 @@ export class TasksService {
   private readonly logger = new Logger(TasksService.name);
   constructor(private readonly poolService: PoolService) {}
 
-  @Cron('1 * * * * *')
+  @Cron('0 * * * * *')
   taskFetchPools() {
     // this.poolService.fetchPools(1000);
   }
 
-  @Cron('3 * * * * *')
+  @Cron('31 * * * * *')
   taskFetchCollections() {
-    // this.poolService.fetchCollections();
+    this.poolService.fetchCollections();
   }
 }
