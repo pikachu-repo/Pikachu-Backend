@@ -228,7 +228,7 @@ export class PoolService {
     isCreation: boolean = true,
   ) {
     const pool = await PikachuContract.getPoolById(poolId);
-    console.log('pool:', formatEther(pool.depositedAmount));
+    // console.log('pool:', formatEther(pool.depositedAmount));
     const poolObj = await this.poolModel.findOneAndUpdate(
       {
         poolId,
@@ -287,6 +287,9 @@ export class PoolService {
     const interestCapRate = parseInt(`0x${event.raw_log_data.slice(322, 386)}`);
     const duration = parseInt(`0x${event.raw_log_data.slice(386, 450)}`);
 
+    const tokenMetadata = await alchemy.nft.getNftMetadata(collection, tokenId);
+    const thumbnail = tokenMetadata.media[0]?.thumbnail;
+
     const obj: any = {
       poolId,
       borrower,
@@ -301,7 +304,9 @@ export class PoolService {
       interestStartRate: interestStartRate / 100,
       interestCapRate: interestCapRate / 100,
       txHash: event.tx_hash,
+      thumbnail: thumbnail,
     };
+
     const loneObj = await this.loanModel.findOneAndUpdate(
       {
         poolId,
@@ -384,7 +389,7 @@ export class PoolService {
 
   async fetchCollection(collection: string) {
     const metadata = await alchemy.nft.getContractMetadata(collection);
-    console.log(metadata);
+    // console.log(metadata);
     try {
       const obj = await this.collectionModel.findOneAndUpdate(
         { contract: collection.toLowerCase() },

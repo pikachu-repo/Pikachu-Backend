@@ -49,6 +49,9 @@ export class Loan {
 
   @Prop({ required: true, default: 0 })
   interestCapRate: number;
+
+  @Prop()
+  thumbnail: string;
 }
 
 export const LoanSchema = SchemaFactory.createForClass(Loan);
