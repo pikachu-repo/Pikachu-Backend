@@ -403,8 +403,7 @@ export class PoolService {
           deployedBlockNumber: toInteger(metadata.deployedBlockNumber),
           imageUrl: toString(metadata.openSea?.imageUrl),
           externalUrl: toString(metadata.openSea?.externalUrl),
-          floorPrice:
-            toFloat(metadata.openSea?.floorPrice) + Math.random() * 35,
+          floorPrice: toFloat(metadata.openSea?.floorPrice), //+ Math.random() * 35,
         },
         { upsert: true, new: true },
       );

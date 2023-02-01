@@ -166,6 +166,7 @@ export interface PikachuInterface extends utils.Interface {
     "updatePool(uint256,uint256,uint256,uint8,uint256,uint256,uint256,bool,address[])": FunctionFragment;
     "verifiedCollections()": FunctionFragment;
     "verify(address,address,uint256,uint256,bytes)": FunctionFragment;
+    "withdrawFreeEth()": FunctionFragment;
     "withdrawFromPool(uint256,uint256)": FunctionFragment;
   };
 
@@ -198,6 +199,7 @@ export interface PikachuInterface extends utils.Interface {
       | "updatePool"
       | "verifiedCollections"
       | "verify"
+      | "withdrawFreeEth"
       | "withdrawFromPool"
   ): FunctionFragment;
 
@@ -356,6 +358,10 @@ export interface PikachuInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "withdrawFreeEth",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "withdrawFromPool",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
@@ -435,6 +441,10 @@ export interface PikachuInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "verify", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawFreeEth",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "withdrawFromPool",
     data: BytesLike
@@ -766,6 +776,10 @@ export interface Pikachu extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
+    withdrawFreeEth(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     withdrawFromPool(
       _poolId: PromiseOrValue<BigNumberish>,
       _amount: PromiseOrValue<BigNumberish>,
@@ -969,6 +983,10 @@ export interface Pikachu extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  withdrawFreeEth(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   withdrawFromPool(
     _poolId: PromiseOrValue<BigNumberish>,
     _amount: PromiseOrValue<BigNumberish>,
@@ -1169,6 +1187,8 @@ export interface Pikachu extends BaseContract {
       signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<boolean>;
+
+    withdrawFreeEth(overrides?: CallOverrides): Promise<void>;
 
     withdrawFromPool(
       _poolId: PromiseOrValue<BigNumberish>,
@@ -1413,6 +1433,10 @@ export interface Pikachu extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    withdrawFreeEth(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     withdrawFromPool(
       _poolId: PromiseOrValue<BigNumberish>,
       _amount: PromiseOrValue<BigNumberish>,
@@ -1582,6 +1606,10 @@ export interface Pikachu extends BaseContract {
       _blockNumber: PromiseOrValue<BigNumberish>,
       signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    withdrawFreeEth(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     withdrawFromPool(
